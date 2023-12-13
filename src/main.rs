@@ -1,0 +1,8 @@
+struct Terminal{
+
+}
+
+
+fn main() {
+
+}
