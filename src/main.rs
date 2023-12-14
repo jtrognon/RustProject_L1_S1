@@ -19,8 +19,17 @@ fn main(){
     displayWords(&words);
 
     // Ask player
-    let word = askPlayer(&words);
+    let word: String = askPlayer(&words).to_string();
+
+    let password = getPassword(&words);
+
+    print!("{password}");
 }
+
+
+// --------------------------------------------------
+// -------------- Recover chosen word ---------------
+// --------------------------------------------------
 
 fn getRandomWords(lengthWord: u16) -> Vec<String> {
     // read file and store its content
@@ -55,7 +64,7 @@ fn displayWords(words: &Vec<String>){
 }
 
 
-fn askPlayer(words: &Vec<String>){
+fn askPlayer(words: &Vec<String>) -> &String{
     let mut index: usize = 0;
 
     while(index == 0){
@@ -86,5 +95,17 @@ fn askPlayer(words: &Vec<String>){
 
     let word = &words[index-1];
 
-    print!("{word}")
+    return word;
+}
+
+
+fn getPassword(words: &Vec<String>) -> String{
+    let mut rng = rand::thread_rng();
+    let index = rng.gen_range(0..words.len());
+    let password = String::from(match words.get(index){
+        Some(i) => i,
+        None => "",
+    });
+
+    return password;
 }
