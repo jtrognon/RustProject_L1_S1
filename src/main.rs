@@ -1,111 +1,96 @@
-use std::fs::read_to_string;
-use std::io::Read;
-use rand::Rng;
 use std::io::Write;
+use rand::Rng;
+use crate::passwordAndWords::nbOfWord;
 
-// struct Terminal{
-//
-// }
+// Import file
+mod passwordAndWords;
 
-// const for the number of word in the terminal
-const nbOfWord: usize = 10;
+fn main() {
+    // Choice of word length
+    print!("Veuillez choisir la taille des mots (de 5 à 10 compris) : ");
+    std::io::stdout().flush().unwrap();
 
-fn main(){
-    // Get list of names
-    let words = getRandomWords(5);
+    // Get word length
+    let mut answer = String::from("");
+    std::io::stdin().read_line(&mut answer).expect("Failed to read line");
 
-    // display the list of words
-    println!("Liste des mots possible : ");
-    displayWords(&words);
+    // extract chosen word length
+    let realAnswer = answer.split("\r\n").collect::<Vec<&str>>()[0];
 
-    // Ask player
-    let word: String = askPlayer(&words).to_string();
+    let mut wordSize: usize = 0;
 
-    let password = getPassword(&words);
-
-    print!("{password}");
-}
-
-
-// --------------------------------------------------
-// -------------- Recover chosen word ---------------
-// --------------------------------------------------
-
-fn getRandomWords(lengthWord: u16) -> Vec<String> {
-    // read file and store its content
-    let path = format!("wordList/{lengthWord}Letter.txt");
-    let content =  read_to_string(path).expect("Should have been able to read the file");
-    let lines: Vec<&str> = content.split("\r\n").collect();
-
-    // get random number as word index in lines
-    let mut wordIndexList: [usize; nbOfWord] = [0; nbOfWord];
-
-    let mut rng = rand::thread_rng();
-
-    for i in (0..nbOfWord){
-        wordIndexList[i] = rng.gen_range(0..lines.len())
-    }
-
-    // get the random words
-    let mut randomWordList: Vec<String> = Vec::new();
-
-    for i in (0..nbOfWord) {
-        randomWordList.push(String::from(lines[wordIndexList[i]]));
-    }
-
-    randomWordList
-}
-
-
-fn displayWords(words: &Vec<String>){
-    for i in (0..words.len()){
-        println!("{}. {}", i+1, words[i])
-    }
-}
-
-
-fn askPlayer(words: &Vec<String>) -> &String{
-    let mut index: usize = 0;
-
-    while(index == 0){
-        // Ask user
-        print!("Choisissez un mot (1, 2, 3, ...) : ");
-        std::io::stdout().flush().unwrap();
-
-        // Get answer
-        let mut answer = String::from("");
-        std::io::stdin().read_line(&mut answer).expect("Failed to read line");
-
-        // extract chosen word
-        let realAnswer = answer.split("\r\n").collect::<Vec<&str>>()[0];
-
-
-        index = match realAnswer.parse::<usize>() {
-            Ok(0) => {
-                println!("Veuillez choisir un nombre entre 1 et {nbOfWord} puis appuyer sur 'Entrer'");
-                0
+    while(wordSize == 0) {
+        wordSize = match realAnswer.parse::<usize>() {
+            Ok(i) => {
+                if i >= 5 && i <= 10 {
+                    i
+                } else {
+                    println!("Veuillez choisir un nombre entre 5 et 10 compris puis appuyer sur 'Entrer'");
+                    0
+                }
             },
             Err(_e) => {
-                println!("Veuillez choisir un nombre entre 1 et {nbOfWord} puis appuyer sur 'Entrer'");
+                println!("Veuillez choisir un nombre entre 5 et 10 compris puis appuyer sur 'Entrer'");
                 0
             },
-            Ok(i) => i,
         };
+    };
+
+    // -----------------------------------------------------
+
+    let (words, passwordId) = passwordAndWords::getWordsAndPassword(&wordSize);
+
+    let quit = false;
+    let mut attempt: usize = 4;
+
+    // Init var loop
+    let mut chosenWord = String::from("");
+    let mut matchingPair: usize = 0;
+    let mut rng = rand::thread_rng();
+    let password = match words.get(passwordId){
+        Some(i) => i,
+        _ => panic!("Problème lors de la création du mot de passe")
+    };
+    let joker = rng.gen_range(0..4);
+
+    while quit == false {
+        println!("----------------------------------------------------");
+        println!("Vous avez {attempt} essais et {joker} jokers");
+        chosenWord = passwordAndWords::askPlayer(&words);
+
+        if chosenWord == "" {
+            attempt += 1;
+        } else {
+            attempt -= 1;
+        }
+
+        matchingPair = matchingLetters(&chosenWord, &password);
+
+        println!("Nombre de lettres correspondantes : {matchingPair}/{}", wordSize);
+
+        if matchingPair == wordSize{
+            println!("--------------------------------------");
+            println!("Bravo !!! Il vous restait {attempt} essais et {joker} jokers.");
+            println!("--------------------------------------");
+            std::process::exit(0);
+        }
+
+        if attempt == 0{
+            println!("---------------------------------------------------");
+            println!("Vous avez perdu !!! Le mot de passe était : {password}.");
+            println!("---------------------------------------------------");
+            std::process::exit(0);
+        }
     }
-
-    let word = &words[index-1];
-
-    return word;
 }
 
+fn matchingLetters(chosenWord: &String, password: &String) -> usize{
+    let mut matchingPair: usize = 0;
+    for i in (0..chosenWord.len()){
+    if chosenWord.chars().collect::<Vec<char>>()[i] == password.chars().collect::<Vec<char>>()[i]{
+            matchingPair += 1;
+        }
+    }
 
-fn getPassword(words: &Vec<String>) -> String{
-    let mut rng = rand::thread_rng();
-    let index = rng.gen_range(0..words.len());
-    let password = String::from(match words.get(index){
-        Some(i) => i,
-        None => "",
-    });
-
-    return password;
+    matchingPair
 }
