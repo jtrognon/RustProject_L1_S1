@@ -14,15 +14,16 @@ But du jeu :
 Trouver le mot de passe parmi les mots disponibles pour débloquer le terminal.
 
 Règles :
-- Il faut choisit un mot ou caractère à chaque tour de jeu
-- Il y a un nombre d'essais maximum
-    - le choix d'un mot utilise un essai
-    - les '{}', '[]', '()', '<>', n'utilise pas d'essai
+- Il faut choisir un mot à chaque tour de jeu
+- Il y a un nombre d'essais maximum.
+    - Le choix d'un mot utilise un essai.
+    - Les jokers n'utilise pas d'essai.
 - A chaque mot choisi, les possibilités sont :
-    - le mot est le bon -> C'est gagné
-    - le mot n'est pas bon -> Le terminal indique le nombre de lettres à la bonne place (il ne dit pas les quelles)
-- les caractères '{}', '[]', '()' et '<>' permettent de : 
-    - Ajouter un essai si il n'y a rien entre eux
-    - Retirer un mot sinon
-- /!\ Ils faut que l'ouverture match avec la fermeture pour les caractères spéciaux
+    - Le mot est le bon, c'est gagné.
+    - Le mot n'est pas bon, le terminal indique le nombre de lettres à la bonne place (il ne dit pas les quelles).
+- Utiliser un jocker permet de soit :
+    - Ajouter un essai (25% de chances).
+    - Retirer un mot (65% de chances).
+    - Ne rien faire (10% de chances).
+- Il y a entre 1 et 3 jokers par partie.
   
