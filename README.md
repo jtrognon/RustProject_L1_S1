@@ -1,19 +1,19 @@
 Mini jeu venant de *Fallout*.
 
-Contexte :
+# Contexte :
 <br>
 Des terminaux sont disseminés dans le monde et il faut les hacker pour pouvoir accéder à leurs contenu et
 débloquer les fonctionnalités du lieu.
 
 
-Exemple de Terminal :
+# Exemple de Terminal :
 <img src="TerminalImage.jpg">
 
-But du jeu :
+# But du jeu :
 <br>
 Trouver le mot de passe parmi les mots disponibles pour débloquer le terminal.
 
-Règles :
+# Règles :
 - Il faut choisir un mot à chaque tour de jeu
 - Il y a un nombre d'essais maximum.
     - Le choix d'un mot utilise un essai.
