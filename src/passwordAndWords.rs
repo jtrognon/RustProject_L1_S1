@@ -8,15 +8,50 @@ use std::io::Write;
 // const for the number of word in the terminal
 pub const nbOfWord: usize = 10;
 
-pub fn getWordsAndPassword(wordSize: &usize) -> (Vec<String>, usize){
-    // Get list of names
-    let words = getRandomWords(wordSize);
+pub struct Word {
+    content: String,
+    isPassword: bool,
+}
 
-    // display the list of words
-    println!("Liste des mots possible : ");
-    displayWords(&words);
+impl Word{
+    fn setPassword(&mut self){
+        self.isPassword = true;
+    }
+
+    pub fn init(content: String) -> Word{
+        Word{content, isPassword: false}
+    }
+
+
+    pub fn getContent(&self) -> String {
+        String::from(&self.content)
+    }
+
+
+    pub fn inList(&self, list: &Vec<&Word>) -> bool{
+        let mut res = false;
+        for word in list{
+            if &word.content == &self.content{
+                res = true
+            }
+        }
+
+        return res;
+    }
+
+    pub fn isPassword(&self) -> &bool{
+        &self.isPassword
+    }
+}
+
+pub fn getWordsAndPassword(wordSize: &usize) -> (Vec<Word>, usize){
+    // Get list of names
+    let mut words = getRandomWords(wordSize);
+
 
     let password = getPassword(&words);
+    words.get_mut(password).unwrap().setPassword();
+
 
     return (words, password);
 }
@@ -26,7 +61,7 @@ pub fn getWordsAndPassword(wordSize: &usize) -> (Vec<String>, usize){
 // -------------- Recover chosen word ---------------
 // --------------------------------------------------
 
-fn getRandomWords(lengthWord: &usize) -> Vec<String> {
+fn getRandomWords(lengthWord: &usize) -> Vec<Word> {
     // read file and store its content
     let path = format!("wordList/{lengthWord}Letter.txt");
     let content =  read_to_string(path).expect("Should have been able to read the file");
@@ -37,33 +72,30 @@ fn getRandomWords(lengthWord: &usize) -> Vec<String> {
 
     let mut rng = rand::thread_rng();
 
+    let mut randomIndex;
     for i in (0..nbOfWord){
-        wordIndexList[i] = rng.gen_range(0..lines.len())
+        randomIndex = rng.gen_range(0..lines.len());
+
+        while wordIndexList.contains(&randomIndex){
+            randomIndex = rng.gen_range(0..lines.len());
+        }
+
+        wordIndexList[i] = randomIndex;
     }
 
     // get the random words
-    let mut randomWordList: Vec<String> = Vec::new();
+    let mut randomWordList: Vec<Word> = Vec::new();
 
     for i in (0..nbOfWord) {
-        randomWordList.push(String::from(lines[wordIndexList[i]]));
+        randomWordList.push(Word::init(String::from(lines[wordIndexList[i]])));
     }
 
     randomWordList
 }
 
-
-pub fn displayWords(words: &Vec<String>){
-    for i in (0..words.len()){
-        println!("{}. {}", i+1, words[i])
-    }
-}
-
-
-pub fn askPlayer(words: &Vec<String>) -> String{
+pub fn askPlayer(words: &Vec<Word>) -> usize{
     let mut index: usize = 0;
     let mut joker = false;
-
-    let word: String;
 
     while(index == 0) && joker == false{
         // Ask user
@@ -102,19 +134,26 @@ pub fn askPlayer(words: &Vec<String>) -> String{
         }
     }
 
-    if ! joker {
-        word = String::from(&words[index-1]);
-    } else {
-        word = String::from("");
-    }
-
-    return word;
+    return index;
 }
 
 
-fn getPassword(words: &Vec<String>) -> usize{
+fn getPassword(words: &Vec<Word>) -> usize{
     let mut rng = rand::thread_rng();
     let index = rng.gen_range(0..words.len());
 
     return index;
+}
+
+
+
+pub fn matchingLetters(chosenWord: &Word, password: &Word) -> usize{
+    let mut matchingPair: usize = 0;
+    for i in (0..chosenWord.content.len()){
+        if chosenWord.content.chars().collect::<Vec<char>>()[i] == password.content.chars().collect::<Vec<char>>()[i]{
+            matchingPair += 1;
+        }
+    }
+
+    matchingPair
 }

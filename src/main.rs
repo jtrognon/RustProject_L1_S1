@@ -38,59 +38,122 @@ fn main() {
 
     // -----------------------------------------------------
 
-    let (words, passwordId) = passwordAndWords::getWordsAndPassword(&wordSize);
+    let (mut words, passwordId) = passwordAndWords::getWordsAndPassword(&wordSize);
 
     let quit = false;
     let mut attempt: usize = 4;
 
     // Init var loop
-    let mut chosenWord = String::from("");
+    let mut chosenWord = &passwordAndWords::Word::init(String::from(""));
     let mut matchingPair: usize = 0;
     let mut rng = rand::thread_rng();
-    let password = match words.get(passwordId){
+    let mut password = match words.get(passwordId){
         Some(i) => i,
         _ => panic!("Problème lors de la création du mot de passe")
     };
-    let joker = rng.gen_range(0..4);
+    let mut joker = rng.gen_range(0..4);
 
+    let mut wordIndex: usize;
+
+    let mut alreadySelected: Vec<&passwordAndWords::Word> = Vec::new();
+    let mut luck: u16;
     while quit == false {
+
+        // display the list of words
         println!("----------------------------------------------------");
-        println!("Vous avez {attempt} essais et {joker} jokers");
-        chosenWord = passwordAndWords::askPlayer(&words);
 
-        if chosenWord == "" {
-            attempt += 1;
+        println!("Liste des mots possible : ");
+        displayWords(&words, &alreadySelected);
+
+        println!("---- Vous avez {attempt} essais et {joker} jokers ----");
+
+        wordIndex = passwordAndWords::askPlayer(&words);
+        if wordIndex == 0{
+            if joker > 0 {
+                joker -= 1;
+                luck = rng.gen_range(0..100);
+
+                if luck <= 25{
+                    attempt += 1;
+                    println!("Vous avez un essai en plus")
+                } else if luck <= 90 {
+                    alreadySelected = randomWord(&words, alreadySelected)
+                }
+            }
         } else {
+            wordIndex -= 1;
+            chosenWord = words.get(wordIndex).unwrap();
+
+            alreadySelected.push(chosenWord);
+
             attempt -= 1;
-        }
 
-        matchingPair = matchingLetters(&chosenWord, &password);
+            matchingPair = passwordAndWords::matchingLetters(&chosenWord, & password);
 
-        println!("Nombre de lettres correspondantes : {matchingPair}/{}", wordSize);
+            println!("Nombre de lettres correspondantes : {matchingPair}/{}", wordSize);
 
-        if matchingPair == wordSize{
-            println!("--------------------------------------");
-            println!("Bravo !!! Il vous restait {attempt} essais et {joker} jokers.");
-            println!("--------------------------------------");
-            std::process::exit(0);
-        }
+            if matchingPair == wordSize{
+                println!("--------------------------------------");
+                println!("Bravo !!! Il vous restait {attempt} essais et {joker} jokers.");
+                println!("--------------------------------------");
+                std::process::exit(0);
+            }
 
-        if attempt == 0{
-            println!("---------------------------------------------------");
-            println!("Vous avez perdu !!! Le mot de passe était : {password}.");
-            println!("---------------------------------------------------");
-            std::process::exit(0);
+            if attempt == 0{
+                println!("---------------------------------------------------");
+                println!("Vous avez perdu !!! Le mot de passe était : {}.", password.getContent());
+                println!("---------------------------------------------------");
+                std::process::exit(0);
+            }
         }
     }
 }
 
-fn matchingLetters(chosenWord: &String, password: &String) -> usize{
-    let mut matchingPair: usize = 0;
-    for i in (0..chosenWord.len()){
-    if chosenWord.chars().collect::<Vec<char>>()[i] == password.chars().collect::<Vec<char>>()[i]{
-            matchingPair += 1;
+
+
+fn displayWords(words: &Vec<passwordAndWords::Word>, alreadySelected: &Vec<&passwordAndWords::Word>){
+    let mut wordPrint: String;
+    let mut word: &passwordAndWords::Word;
+    for i in (0..words.len()){
+        word = words.get(i).unwrap();
+        if word.inList(alreadySelected){
+            wordPrint = String::from("...");
+        } else {
+            wordPrint = word.getContent();
+        }
+
+        println!("{}. {}", i+1, wordPrint)
+    }
+}
+
+
+fn randomWord<'a>(words: &'a Vec<passwordAndWords::Word>, mut alreadySelected: Vec<&'a passwordAndWords::Word>) -> Vec<&'a passwordAndWords::Word>{
+    let mut word: &passwordAndWords::Word;
+
+    let mut wordNotSelected = Vec::new();
+    for i in (0..words.len()){
+        word = words.get(i).unwrap();
+        if ! word.inList(&alreadySelected) {
+            wordNotSelected.push(word);
         }
     }
 
-    matchingPair
+    let mut rng = rand::thread_rng();
+    let randomNum = rng.gen_range(0..wordNotSelected.len());
+
+    word = words.get(randomNum).unwrap();
+
+    if word.isPassword() == &true{
+        alreadySelected
+    } else {
+        alreadySelected.push(word);
+        alreadySelected
+    }
 }
+
+
+
+
+
+
+// PAS TROP DE ALWAYS
