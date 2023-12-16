@@ -25,5 +25,5 @@ Trouver le mot de passe parmi les mots disponibles pour débloquer le terminal.
     - Ajouter un essai (30% de chances).
     - Retirer un mot (60% de chances).
     - Ne rien faire (10% de chances).
-- Il y a entre 1 et 3 jokers par partie.
+- Il y a entre 0 et 3 jokers par partie.
   
