@@ -22,8 +22,8 @@ Trouver le mot de passe parmi les mots disponibles pour débloquer le terminal.
     - Le mot est le bon, c'est gagné.
     - Le mot n'est pas bon, le terminal indique le nombre de lettres à la bonne place (il ne dit pas les quelles).
 - Utiliser un jocker permet de soit :
-    - Ajouter un essai (25% de chances).
-    - Retirer un mot (65% de chances).
+    - Ajouter un essai (30% de chances).
+    - Retirer un mot (60% de chances).
     - Ne rien faire (10% de chances).
 - Il y a entre 1 et 3 jokers par partie.
   
