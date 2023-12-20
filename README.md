@@ -26,4 +26,7 @@ Trouver le mot de passe parmi les mots disponibles pour débloquer le terminal.
     - Retirer un mot (60% de chances).
     - Ne rien faire (10% de chances).
 - Il y a entre 0 et 3 jokers par partie.
-  
+
+
+  # Lancement du programme
+  Il suffit de décompresser le fichier zip et de lancer *projet.exe*.
